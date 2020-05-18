@@ -2,18 +2,18 @@
 
 namespace app\controllers;
 
-use Yii;
-use yii\filters\AccessControl;
-use yii\web\Controller;
-use yii\web\Response;
-use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
-use yii\data\ActiveDataProvider;
-use app\models\Posts;
 use app\models\Categories;
+use app\models\ContactForm;
+use app\models\LoginForm;
+use app\models\Posts;
 use Faker\Factory;
+use Yii;
 use yii\data\Pagination;
+use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
+use yii\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class SiteController extends Controller
 {
@@ -64,77 +64,85 @@ class SiteController extends Controller
      *
      * @return string
      */
-   public function actionIndex()
+    public function actionIndex()
     {
-		
-		if (Yii::$app->request->get('cat')==true){
-		$cat = Yii::$app->request->get('cat');
-		$cat_query = Categories::find()->Where('alias = :alias', [':alias' =>$cat])->one();
-		//var_dump($cat_query->id);
-		$query = Posts::find()->Where('category = :category', [':category' =>$cat_query->id])->orderby(['id'=>SORT_DESC]);}
-	else
-	{$query = Posts::find()->orderby(['id'=>SORT_DESC]);}
-	
 
-    $countQuery = clone $query;
-	
-    $pages = new Pagination(['totalCount' => $countQuery->count(), 'pageSize' => 10]);
-    
-    $pages->pageSizeParam = false;
-    $models = $query->offset($pages->offset)
-        ->limit($pages->limit)
-        ->all();
-    
-    return $this->render('index', [
-         'models' => $models,
-         'pages' => $pages,
-    ]);
-        
 
-       
+
+        if (Yii::$app->request->get('cat') == true) {
+            if (!$post = Categories::find()->where('alias = :alias', [':alias' => Yii::$app->request->get('cat')])->one()) {
+                throw new NotFoundHttpException('!@#$%^&*!', 404);
+            }
+            $cat = Yii::$app->request->get('cat');
+            $cat_query = Categories::find()->Where('alias = :alias', [':alias' => $cat])->one();
+            //var_dump($cat_query->id);
+            $query = Posts::find()->Where('category = :category', [':category' => $cat_query->id])->orderby(['id' => SORT_DESC]);
+        } else {
+            $query = Posts::find()->orderby(['id' => SORT_DESC]);
+        }
+
+
+        $countQuery = clone $query;
+
+        $pages = new Pagination(['totalCount' => $countQuery->count(), 'pageSize' => 10]);
+
+        $pages->pageSizeParam = false;
+        $models = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+
+        return $this->render('index', [
+            'models' => $models,
+            'pages' => $pages,
+        ]);
+
+
     }
-	
-	 public function actionPage()
+
+    public function actionPage()
     {
-		if (Yii::$app->request->get('id')==true){
-			
-			$page = Yii::$app->request->get('id');
-			
-			$query = Posts::find()->Where('id = :id', [':id' =>$page])->one();
-			
-			$model = $query;
-			
-			
-		}
-		return $this->render('page', [
-			'model' => $model,
-			
-			]);
-	}
-	
-	public function actionFaker()
-{if (Yii::$app->user->isGuest) {
+        if (!$post = Posts::find()->where('id = :id', [':id' => Yii::$app->request->get('id')])->one()) {
+            throw new NotFoundHttpException('!@#$%^&*!', 404);
+        }
+
+
+        if (Yii::$app->request->get('id') == true) {
+
+            $page = Yii::$app->request->get('id');
+
+            $query = Posts::find()->Where('id = :id', [':id' => $page])->one();
+
+            $model = $query;
+
+
+        }
+        return $this->render('page', [
+            'model' => $model,
+
+        ]);
+    }
+
+    public function actionFaker()
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
-  $faker = Factory::create();
- 
-  for($i = 0; $i < 10; $i++)
-  {
-    $post = new Posts();
-    $post->title = $faker->text(30);
-    $post->keywords = $faker->text(rand(100, 200));
-	$post->description = $faker->text(rand(100, 200));
-    $post->text = $faker->text(rand(1000, 2000));
-    $post->category = rand(1, 5);
-	$post->alias = $faker->text(rand(5, 20));
-    $post->created_date = $faker->date();
-    $post->save(false);
-  }
-  die('Data generation is complete!');
-}
+        $faker = Factory::create();
 
-    
-    
+        for ($i = 0; $i < 10; $i++) {
+            $post = new Posts();
+            $post->title = $faker->text(30);
+            $post->keywords = $faker->text(rand(100, 200));
+            $post->description = $faker->text(rand(100, 200));
+            $post->text = $faker->text(rand(1000, 2000));
+            $post->category = rand(1, 5);
+            $post->alias = $faker->text(rand(5, 20));
+            $post->created_date = $faker->date();
+            $post->save(false);
+        }
+        die('Data generation is complete!');
+    }
+
 
     /**
      * Login action.

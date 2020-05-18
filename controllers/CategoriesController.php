@@ -2,12 +2,12 @@
 
 namespace app\controllers;
 
-use Yii;
 use app\models\Categories;
+use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 
 /**
  * CategoriesController implements the CRUD actions for Categories model.
@@ -35,7 +35,7 @@ class CategoriesController extends Controller
      */
     public function actionIndex()
     {
-		if (Yii::$app->user->isGuest) {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $dataProvider = new ActiveDataProvider([
@@ -54,7 +54,8 @@ class CategoriesController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         return $this->render('view', [
@@ -63,12 +64,29 @@ class CategoriesController extends Controller
     }
 
     /**
+     * Finds the Categories model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return Categories the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Categories::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
      * Creates a new Categories model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $model = new Categories();
@@ -90,7 +108,8 @@ class CategoriesController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $model = $this->findModel($id);
@@ -112,27 +131,12 @@ class CategoriesController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the Categories model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Categories the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Categories::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

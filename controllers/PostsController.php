@@ -2,12 +2,12 @@
 
 namespace app\controllers;
 
-use Yii;
 use app\models\Posts;
+use Yii;
 use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 
 /**
  * PostsController implements the CRUD actions for Posts model.
@@ -34,7 +34,8 @@ class PostsController extends Controller
      * @return mixed
      */
     public function actionIndex()
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $dataProvider = new ActiveDataProvider([
@@ -53,7 +54,8 @@ class PostsController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         return $this->render('view', [
@@ -62,12 +64,29 @@ class PostsController extends Controller
     }
 
     /**
+     * Finds the Posts model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return Posts the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = Posts::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
      * Creates a new Posts model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $model = new Posts();
@@ -89,7 +108,8 @@ class PostsController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $model = $this->findModel($id);
@@ -111,27 +131,12 @@ class PostsController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionDelete($id)
-    {if (Yii::$app->user->isGuest) {
+    {
+        if (Yii::$app->user->isGuest) {
             return $this->goHome();
         }
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the Posts model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Posts the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Posts::findOne($id)) !== null) {
-            return $model;
-        }
-
-        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }
